@@ -1,0 +1,64 @@
+#container {
+    width: 800px;
+    height: 800px;
+}
+
+.tile {
+    width: 2.45em;
+    height: 2.45em;
+    line-height: 2.45em;
+    display: inline-block;
+    text-align: center;
+    font-size: 4em;
+    font-weight: bold;
+    float: left;
+}
+
+.one {
+    background: rgba(185, 243, 73, 1);
+    color: rgba(55, 176, 11, 1);
+}
+.two {
+    background: rgba(86, 192, 252, 1);
+    color: rgba(15, 137, 255, 1);
+}
+.three {
+    background: rgba(255, 200, 91, 1);
+    color: rgba(255, 118, 28, 1);
+}
+.four {
+    background: rgba(255, 114, 85, 1);
+    color: rgba(255, 208, 153, 1);
+}
+.five {
+    background: rgba(0, 158, 134, 1);
+    color: rgba(123, 232, 154, 1);
+}
+.six {
+    background: rgba(119, 98, 251, 1);
+    color: rgba(205, 188, 255, 1);
+}
+.seven {
+    background: rgba(246, 87, 195, 1);
+    color: rgba(255, 189, 166, 1);
+}
+.eight {
+    background: rgba(230, 47, 70, 1);
+    color: rgba(255, 209, 179, 1);
+}
+.nine {
+    background: rgba(255, 247, 51, 1);
+    color: rgba(209, 91, 50, 1);
+}
+.ten {
+    background: black;
+    color: white;
+}
+.eleven {
+    background: rgba(128, 128, 128, 1);
+    color: white;
+}
+.twelve {
+    background: rgba(192, 192, 192, 1);
+    color: white;
+}
