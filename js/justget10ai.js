@@ -9,11 +9,11 @@
 var JustGet10AI = (function() {
     /**********
      * config */
-    var width = 5;
-    var height = 5;
+    var width = 5, height = 5;
     var newTileDelay = 350; //ms
-    var numRandomMoves = 200;
+    var numRandomMoves = 100;
     var computerMoveDelay = 20; //ms
+    var lhRatio = 4;
 
     /*************
      * constants */
@@ -25,11 +25,13 @@ var JustGet10AI = (function() {
     /*********************
      * working variables */
     var state;
+    var maxSeen;
 
     /******************
      * work functions */
     function initJustGet10AI() {
         state = getRandomGrid(1, 3);
+        maxSeen = 3; //reasonable assumption
         drawState();
 
         //add all the event listeners
@@ -74,6 +76,7 @@ var JustGet10AI = (function() {
         //add the resulting tile
         if (numsRemoved > 1) {
             state[c[0]][c[1]] = blobValue+1;
+            if (blobValue+1 > maxSeen) maxSeen = blobValue+1;
         } else { //need more than one tile to merge
             state[c[0]][c[1]] = blobValue;
             return;
@@ -93,15 +96,15 @@ var JustGet10AI = (function() {
                 }
             }
         }
-        
-        //draw the version with gravity applied
-        setTimeout(drawState, newTileDelay);
 
         //generate new tiles
+        var maxNumToGen = Math.max(Math.min(6, maxSeen-2), 3); //[3, 6]
         for (var hi = 0; hi < height; hi++) {
             for (var wi = 0; wi < width; wi++) {
                 if (state[hi][wi] === 0) {
-                    state[hi][wi] = getWeightedIndex(3+1, 2, 1);
+                    state[hi][wi] = getWeightedIndex(
+                        maxNumToGen+1, lhRatio, 1
+                    );
                 }
             }
         }
@@ -187,8 +190,9 @@ var JustGet10AI = (function() {
         for (var hi = 0; hi < height; hi++) {
             ret.push([]);
             for (var wi = 0; wi < width; wi++) {
+                //low is lhRatio as likely
                 ret[hi].push(
-                    getWeightedIndex(high+1, 2, low) //low is 2x as likely
+                    getWeightedIndex(high+1, lhRatio, low)
                 );
             }
         }
