@@ -10,8 +10,13 @@
     display: inline-block;
     text-align: center;
     font-size: 4em;
-    font-weight: bold;
+    font-weight: normal;
     float: left;
+    cursor: pointer;
+}
+
+.tile:hover {
+    font-weight: bold;
 }
 
 .one {

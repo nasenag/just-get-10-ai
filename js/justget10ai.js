@@ -11,6 +11,9 @@ var JustGet10AI = (function() {
      * config */
     var width = 5;
     var height = 5;
+    var newTileDelay = 350; //ms
+    var numRandomMoves = 200;
+    var computerMoveDelay = 20; //ms
 
     /*************
      * constants */
@@ -26,17 +29,91 @@ var JustGet10AI = (function() {
     /******************
      * work functions */
     function initJustGet10AI() {
-        randomlyInitTiles();
-        logMatrix(identBlobs(state));
+        state = getRandomGrid(1, 3);
+        drawState();
+
+        //add all the event listeners
+        for (var hi = 0; hi < height; hi++) {
+            for (var wi = 0; wi < width; wi++) {
+                var id = hi*width+wi;
+                $s('#'+id).addEventListener('click', (function(tileId) {
+                    return function() {
+                        mergeAt(tileId);
+                    }
+                })(id));
+            }
+        }
+
+        //move randomly
+        for (var ai = 0; ai < numRandomMoves; ai++) {
+            setTimeout((function(id) {
+                return function() {
+                    mergeAt(id);
+                };
+            })(getRandInt(0, 25)), ai*computerMoveDelay);
+        }
+    }
+
+    function mergeAt(id) {
+        var c = coordsFromId(id, state[0].length);
+        var blobs = identBlobs(state);
+        var blobToMerge = blobs[c[0]][c[1]];
+        var blobValue = state[c[0]][c[1]];
+
+        //get rid of all the numbers in this blob
+        var numsRemoved = 0;
+        for (var hi = 0; hi < height; hi++) {
+            for (var wi = 0; wi < width; wi++) {
+                if (blobToMerge === blobs[hi][wi]) {
+                    state[hi][wi] = 0;
+                    numsRemoved += 1;
+                }
+            }
+        }
+
+        //add the resulting tile
+        if (numsRemoved > 1) {
+            state[c[0]][c[1]] = blobValue+1;
+        } else { //need more than one tile to merge
+            state[c[0]][c[1]] = blobValue;
+            return;
+        }
+
+        //draw the version with the merged tile
+        drawState();
+
+        //gravity
+        for (var hi = 0; hi < height; hi++) {
+            for (var wi = 0; wi < width; wi++) {
+                if (state[hi][wi] === 0) {
+                    for (var ri = hi; ri >= 1; ri--) {
+                        state[ri][wi] = state[ri-1][wi];
+                        state[ri-1][wi] = 0;
+                    }
+                }
+            }
+        }
+        
+        //draw the version with gravity applied
+        setTimeout(drawState, newTileDelay);
+
+        //generate new tiles
+        for (var hi = 0; hi < height; hi++) {
+            for (var wi = 0; wi < width; wi++) {
+                if (state[hi][wi] === 0) {
+                    state[hi][wi] = getWeightedIndex(3+1, 2, 1);
+                }
+            }
+        }
+
+        //draw the tiles with the newly added ones
+        setTimeout(drawState, newTileDelay);
     }
 
     function identBlobs(st) {
-        function coordsFromId(id) {
-            return [Math.floor(id/st[0].length), id%st[0].length]; //row, col
-        }
         function checkNeighbors(s, b, id, visited) {
             visited.push(id);
-            var c = coordsFromId(id);
+            var c = coordsFromId(id, s[0].length);
 
             //check left
             if (c[1] > 0 && visited.indexOf(id-1) === -1) {
@@ -84,7 +161,7 @@ var JustGet10AI = (function() {
         var seen = [];
         for (var ai = 0; ai < height*width; ai++) {
             if (seen.indexOf(ai) === -1) { //haven't seen before?
-                var c = coordsFromId(ai);
+                var c = coordsFromId(ai, st[0].length);
                 ret[c[0]][c[1]] = currBlobId;
                 currBlobId += 1;
                 checkNeighbors(st, ret, ai, seen);
@@ -94,14 +171,13 @@ var JustGet10AI = (function() {
         return ret;
     }
 
-    function randomlyInitTiles() {
-        state = getRandomGrid(1, 3);
+    function drawState() {
         for (var hi = 0; hi < height; hi++) {
             for (var wi = 0; wi < width; wi++) {
-                //in [1, 4), 1 is 2x as likely as 4
-                var tile = document.getElementById(hi+'-'+wi);
+                var id = hi*width+wi;
+                var tile = $s('#'+id);
                 tile.className = 'tile ' + ENG_NUMS[state[hi][wi]];
-                tile.innerHTML = state[hi][wi];
+                tile.innerHTML = state[hi][wi] === 0 ? '' : state[hi][wi];
             }
         }
     }
@@ -142,6 +218,9 @@ var JustGet10AI = (function() {
             console.log(row.substring(0, row.length-1));
         }
     }
+    function coordsFromId(id, w) {
+        return [Math.floor(id/w), id%w]; //row, col
+    }
     function forceLen(str, padding, len, padFront) {
         if (str.length > len) return;
         var ret = str;
@@ -181,8 +260,8 @@ var JustGet10AI = (function() {
 
     return {
         init: initJustGet10AI,
-        identBlobs: identBlobs
-    }
+        mergeAt: mergeAt
+    };
 })();
 
 window.addEventListener('load', function() {
