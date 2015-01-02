@@ -1,7 +1,7 @@
 /******************\
 |  Just Get 10 AI  |
 | @author Anthony  |
-| @version 0.1     |
+| @version 0.2     |
 | @date 2015/01/01 |
 | @edit 2015/01/01 |
 \******************/
