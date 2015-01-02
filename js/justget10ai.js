@@ -31,7 +31,7 @@ var JustGet10AI = (function() {
      * work functions */
     function initJustGet10AI() {
         state = getRandomGrid(1, 3);
-        maxSeen = 3; //reasonable assumption
+        maxSeen = 3;
         drawState();
 
         //add all the event listeners
@@ -41,7 +41,7 @@ var JustGet10AI = (function() {
                 $s('#'+id).addEventListener('click', (function(tileId) {
                     return function() {
                         mergeAt(tileId);
-                    }
+                    };
                 })(id));
             }
         }
@@ -56,7 +56,7 @@ var JustGet10AI = (function() {
         }
     }
 
-    function mergeAt(id) {
+    function mergeAt(id) { //returns false iff game is over
         var c = coordsFromId(id, state[0].length);
         var blobs = identBlobs(state);
         var blobToMerge = blobs[c[0]][c[1]];
@@ -111,6 +111,23 @@ var JustGet10AI = (function() {
 
         //draw the tiles with the newly added ones
         setTimeout(drawState, newTileDelay);
+
+        //check to see if the game is over
+        var newBlobs = identBlobs(state);
+        for (var hi = 0; hi < height; hi++) {
+            for (var wi = 0; wi < width; wi++) {
+                if (newBlobs[hi][wi] === width*height-1) { //max # blobs
+                    setTimeout(function() {
+                        alert('Game over.');
+                        state = getRandomGrid(1, 3);
+                        drawState();
+                    }, 2*newTileDelay);
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     function identBlobs(st) {
@@ -191,9 +208,8 @@ var JustGet10AI = (function() {
             ret.push([]);
             for (var wi = 0; wi < width; wi++) {
                 //low is lhRatio as likely
-                ret[hi].push(
-                    getWeightedIndex(high+1, lhRatio, low)
-                );
+                var num = getWeightedIndex(high+1, lhRatio, low);
+                ret[hi].push(num);
             }
         }
         return ret;
