@@ -10,8 +10,8 @@ var JustGet10AI = (function() {
     /**********
      * config */
     var width = 5, height = 5;
-    var newTileDelay = 350; //ms
-    var numRandomMoves = 100;
+    var newTileDelay = 150; //ms
+    var numRandomMoves = 50;
     var computerMoveDelay = 20; //ms
     var lhRatio = 4;
 
@@ -32,7 +32,7 @@ var JustGet10AI = (function() {
     function initJustGet10AI() {
         state = getRandomGrid(1, 3);
         maxSeen = 3;
-        drawState();
+        drawState(state);
 
         //add all the event listeners
         for (var hi = 0; hi < height; hi++) {
@@ -83,7 +83,7 @@ var JustGet10AI = (function() {
         }
 
         //draw the version with the merged tile
-        drawState();
+        drawState(state);
 
         //gravity
         for (var hi = 0; hi < height; hi++) {
@@ -96,6 +96,13 @@ var JustGet10AI = (function() {
                 }
             }
         }
+
+        //draw the tiles after everything falls
+        setTimeout((function(st) {
+            return function() {
+                drawState(st);
+            };
+        })(JSON.parse(JSON.stringify(state))), newTileDelay);
 
         //generate new tiles
         var maxNumToGen = Math.max(Math.min(6, maxSeen-2), 3); //[3, 6]
@@ -110,7 +117,11 @@ var JustGet10AI = (function() {
         }
 
         //draw the tiles with the newly added ones
-        setTimeout(drawState, newTileDelay);
+        setTimeout((function(st) {
+            return function() {
+                drawState(st);
+            };
+        })(JSON.parse(JSON.stringify(state))), 2*newTileDelay);
 
         //check to see if the game is over
         var newBlobs = identBlobs(state);
@@ -120,7 +131,8 @@ var JustGet10AI = (function() {
                     setTimeout(function() {
                         alert('Game over.');
                         state = getRandomGrid(1, 3);
-                        drawState();
+                        maxSeen = 3;
+                        drawState(state);
                     }, 2*newTileDelay);
                     return false;
                 }
@@ -191,13 +203,13 @@ var JustGet10AI = (function() {
         return ret;
     }
 
-    function drawState() {
+    function drawState(st) {
         for (var hi = 0; hi < height; hi++) {
             for (var wi = 0; wi < width; wi++) {
                 var id = hi*width+wi;
                 var tile = $s('#'+id);
-                tile.className = 'tile ' + ENG_NUMS[state[hi][wi]];
-                tile.innerHTML = state[hi][wi] === 0 ? '' : state[hi][wi];
+                tile.className = 'tile ' + ENG_NUMS[st[hi][wi]];
+                tile.innerHTML = st[hi][wi] === 0 ? '' : st[hi][wi];
             }
         }
     }
